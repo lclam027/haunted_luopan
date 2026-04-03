@@ -8,13 +8,13 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #5d0202; /* Deep, dark blood red */
+            background-color: #5d0202;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Crimson Text', serif;
+            font-family: serif;
         }
 
         .compass-frame {
@@ -57,7 +57,6 @@
             transition: transform 0.1s ease-out;
         }
 
-        /* --- Fullscreen Button Styles --- */
         #fs-btn {
             position: absolute;
             bottom: 20px;
@@ -70,14 +69,14 @@
             font-size: 0.8rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: all 0.3s ease;
+            transition: opacity 0.5s ease; /* Smooth fade when disappearing */
             z-index: 10;
         }
 
-        #fs-btn:hover {
-            background: #7a0000;
-            color: white;
-            box-shadow: 0 0 15px #ff0000;
+        /* This class will be toggled by JS */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -109,23 +108,27 @@
         // --- Fullscreen Logic ---
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
-                fsBtn.innerText = "Exit The Void";
+                document.documentElement.requestFullscreen();
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                    fsBtn.innerText = "Enter The Void";
                 }
             }
         }
 
+        // --- Handle UI visibility based on fullscreen state ---
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                // If we are in fullscreen, hide the button
+                fsBtn.classList.add('hidden');
+            } else {
+                // If we exit fullscreen, show the button again
+                fsBtn.classList.remove('hidden');
+            }
+        });
+
         fsBtn.addEventListener('click', toggleFullScreen);
-        
-        // Start the haunting
         updateHaunting();
     </script>
-
 </body>
 </html>
