@@ -8,7 +8,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #5d0202; /* Deep, dark blood red for the atmosphere */
+            background-color: #5d0202;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,50 +19,64 @@
 
         .compass-frame {
             position: relative;
-            width: 85vmin; /* Slightly smaller for focus */
+            width: 85vmin;
             height: 85vmin;
-            background-color: #1a1a1a; /* Very dark base */
+            background-color: #1a1a1a;
             border-radius: 15px; 
-            box-shadow: 0 0 80px rgba(0,0,0,0.8); /* Deep shadow */
+            box-shadow: 0 0 80px rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
             border: 10px solid #222;
         }
 
-        /* The Dial (Static) */
         .luopan-image {
             width: 90%;
             height: 90%;
             object-fit: contain;
             border-radius: 50%;
-            background-color: #e8dfc1; /* Aged paper effect */
-            z-index: 1; /* Dial is at the bottom */
-            opacity: 0.95; /* Subtle ghostliness */
-            filter: brightness(70%) /* reduce brightness*/
+            background-color: #e8dfc1;
+            z-index: 1;
+            opacity: 0.95;
+            filter: brightness(70%);
         }
 
-        /* The Needle (Layered over the dial) */
         .luopan-needle {
             position: absolute;
-            width: 15%; /* Needle length scaled to the center dial */
+            width: 15%;
             height: 50%;
-            z-index: 5; /* Needle is on top */
-            /* Crucial for centering a position:absolute element */
+            z-index: 5;
             top: 50%;
             left: 50%;
-            /* Offset by half its size, then dynamic rotation from JS is appended */
             transform-origin: center center;
-            opacity: 0.85; /* Makes it look spectral and aged */
-            
-            /* The 4-way black outline technique */
+            opacity: 0.85;
             filter: drop-shadow(1px 1px 0px black) 
                     drop-shadow(-1px -1px 0px black) 
                     drop-shadow(1px -1px 0px black) 
                     drop-shadow(-1px 1px 0px black);
-            
-            /* CSS Transition: Smoothly interpolates the rotation changes from JS */
-            transition: transform 0.1s ease-out; /* 'Shiver' speed (medium) */
+            transition: transform 0.1s ease-out;
+        }
+
+        #fs-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #bcbcbc;
+            border: 1px solid #444;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: opacity 0.5s ease; /* Smooth fade when disappearing */
+            z-index: 10;
+        }
+
+        /* This class will be toggled by JS */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -70,37 +84,51 @@
 
     <div class="compass-frame">
         <img src="luopan.png" alt="Feng Shui Luopan Dial" class="luopan-image">
-        
         <img src="luopan_needle.png" alt="Haunted Needle" class="luopan-needle" id="hauntedNeedle">
     </div>
 
+    <button id="fs-btn">Enter The Void</button>
+
     <script>
         const needle = document.getElementById('hauntedNeedle');
+        const fsBtn = document.getElementById('fs-btn');
         
-        /* Configuration for the 'Haunting' effect */
-        const baseAngle = 180; // The needle points 'South' (down) in Chinese practice
-        const maxDeviance = 100; // The maximum random offset in degrees (+/-)
-        const updateIntervalMS = 60; // How fast the shiver changes (milliseconds)
+        // --- Haunting Logic ---
+        const baseAngle = 180; 
+        const maxDeviance = 100; 
+        const updateIntervalMS = 60; 
         
         function updateHaunting() {
-            // 1. Generate a new, random deviance
             const randomOffset = (Math.random() - 0.5) * 2 * maxDeviance;
-            
-            // 2. Calculate the new complete angle
             const newAngle = baseAngle + randomOffset;
-            
-            // 3. Apply the rotation. 
-            // Note: the translate(-50%, -50%) keeps the image centered, 
-            // and the rotation is appended.
             needle.style.transform = `translate(-50%, -50%) rotate(${newAngle}deg)`;
-            
-            // 4. Repeat recursively (a high-frequency loop)
             setTimeout(updateHaunting, updateIntervalMS);
         }
         
-        // Start the haunting
+        // --- Fullscreen Logic ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- Handle UI visibility based on fullscreen state ---
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                // If we are in fullscreen, hide the button
+                fsBtn.classList.add('hidden');
+            } else {
+                // If we exit fullscreen, show the button again
+                fsBtn.classList.remove('hidden');
+            }
+        });
+
+        fsBtn.addEventListener('click', toggleFullScreen);
         updateHaunting();
     </script>
-
 </body>
 </html>
